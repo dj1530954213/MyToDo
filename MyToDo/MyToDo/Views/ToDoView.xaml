@@ -1,0 +1,227 @@
+﻿<UserControl
+    x:Class="MyToDo.Views.ToDoView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:behaviors="http://schemas.microsoft.com/xaml/behaviors"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:MyToDo.Views"
+    xmlns:materdesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:visbility="clr-namespace:MyToDo.Common.Converters"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <UserControl.Resources>
+        <visbility:IntToVisibilityConverter x:Key="IntToVisibilityConverter" />
+    </UserControl.Resources>
+    <!--  将总的Grid放置在DialogHost中才能制作出右边折叠窗口(编辑数据)的效果  -->
+    <materdesign:DialogHost>
+        <!--  定义一个侧边栏窗口容器  -->
+        <materdesign:DrawerHost IsRightDrawerOpen="{Binding RightDrawerOpen}">
+            <!--  将侧边栏窗口容器实例化为右侧窗口容器  -->
+            <materdesign:DrawerHost.RightDrawerContent>
+                <DockPanel Width="300" LastChildFill="False">
+                    <TextBlock
+                        Padding="20,10"
+                        DockPanel.Dock="Top"
+                        FontSize="20"
+                        FontWeight="Bold"
+                        Text="添加待办" />
+
+                    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
+                        <TextBlock
+                            Margin="20,0"
+                            VerticalAlignment="Center"
+                            FontSize="15"
+                            FontWeight="Light"
+                            Text="状态 :" />
+                        <ComboBox FontSize="15" SelectedIndex="{Binding CurrentToDo.Status}">
+                            <ComboBoxItem>待办</ComboBoxItem>
+                            <ComboBoxItem>已完成</ComboBoxItem>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <TextBox
+                        Padding="20"
+                        materdesign:HintAssist.Hint="请输入待办概要"
+                        DockPanel.Dock="Top"
+                        FontSize="15"
+                        Text="{Binding CurrentToDo.Title}" />
+                    <TextBox
+                        MinHeight="100"
+                        Padding="20"
+                        materdesign:HintAssist.Hint="请输入待办内容"
+                        DockPanel.Dock="Top"
+                        FontSize="15"
+                        Text="{Binding CurrentToDo.Content}"
+                        TextWrapping="WrapWithOverflow" />
+                    <Button
+                        Command="{Binding ExecuteCommand}"
+                        CommandParameter="保存"
+                        Content="添加到待办"
+                        DockPanel.Dock="Top" />
+                </DockPanel>
+            </materdesign:DrawerHost.RightDrawerContent>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+                <StackPanel Margin="15,0,0,0" Orientation="Horizontal">
+                    <!--  双向绑定，只要数据发生变化就更新  -->
+                    <TextBox
+                        Width="250"
+                        VerticalContentAlignment="Center"
+                        materdesign:HintAssist.Hint="查找待办事项..."
+                        materdesign:TextFieldAssist.HasClearButton="True"
+                        Text="{Binding Search, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                        <TextBox.InputBindings>
+                            <KeyBinding
+                                Key="Enter"
+                                Command="{Binding ExecuteCommand}"
+                                CommandParameter="查询" />
+                        </TextBox.InputBindings>
+                    </TextBox>
+                    <TextBlock
+                        Margin="10,0"
+                        VerticalAlignment="Center"
+                        Text="筛选 :" />
+                    <ComboBox SelectedIndex="{Binding SelectedIndex}">
+                        <ComboBoxItem>全部</ComboBoxItem>
+                        <ComboBoxItem>待办</ComboBoxItem>
+                        <ComboBoxItem>已完成</ComboBoxItem>
+                    </ComboBox>
+                </StackPanel>
+                <Button
+                    Margin="10,5"
+                    HorizontalAlignment="Right"
+                    Command="{Binding ExecuteCommand}"
+                    CommandParameter="新增"
+                    Content="添加待办" />
+                <!--  这里使用了绑定转换的技术 可以在最上面的空间资源中找到转换类的申明以及如何使用  -->
+                <StackPanel
+                    Grid.Row="1"
+                    VerticalAlignment="Center"
+                    Visibility="{Binding ToDoTables.Count, Converter={StaticResource IntToVisibilityConverter}}">
+                    <Image
+                        Width="120"
+                        Height="120"
+                        Source="/Images/wind.png" />
+                    <TextBlock
+                        Margin="0,20"
+                        HorizontalAlignment="Center"
+                        FontSize="18"
+                        Text="未搜索到任何数据请添加新的待办事项或重新搜索" />
+                </StackPanel>
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Hidden">
+                    <ItemsControl HorizontalAlignment="Center" ItemsSource="{Binding ToDoTables}">
+                        <!--  定义容器部分  -->
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <!--  定义模板部分  -->
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <materdesign:TransitioningContent OpeningEffect="{materdesign:TransitionEffect Kind=ExpandIn}">
+                                    <Grid
+                                        Width="220"
+                                        MinHeight="180"
+                                        MaxHeight="250"
+                                        Margin="10">
+                                        <!--  行为触发器  -->
+                                        <behaviors:Interaction.Triggers>
+                                            <behaviors:EventTrigger EventName="MouseLeftButtonUp">
+                                                <behaviors:InvokeCommandAction Command="{Binding DataContext.SelectedCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ItemsControl}}" CommandParameter="{Binding}" />
+                                            </behaviors:EventTrigger>
+                                        </behaviors:Interaction.Triggers>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition />
+                                        </Grid.RowDefinitions>
+                                        <!--  Panel.ZIndex="1"当元素存在重叠时通过此属性来设置层叠先后  -->
+                                        <materdesign:PopupBox HorizontalAlignment="Right" Panel.ZIndex="1">
+                                            <Button
+                                                Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ItemsControl}}"
+                                                CommandParameter="{Binding}"
+                                                Content="删除" />
+                                        </materdesign:PopupBox>
+                                        <Border Grid.RowSpan="2" CornerRadius="5">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Status}" Value="0">
+                                                            <Setter Property="Background" Value="DarkCyan" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Status}" Value="1">
+                                                            <Setter Property="Background" Value="DarkGray" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                        </Border>
+                                        <!--  指定容器内部元素与容器边框的距离  -->
+                                        <!--  margin与padding的区别：例如两个文本框的距离使用margin，文本框的边框和文本内容之间的距离使用padding  -->
+                                        <TextBlock
+                                            Padding="10,5"
+                                            FontWeight="Bold"
+                                            Text="{Binding Title}" />
+                                        <TextBlock
+                                            Grid.Row="1"
+                                            Padding="10,5"
+                                            Text="{Binding Content}" />
+
+                                        <Canvas Grid.RowSpan="2" ClipToBounds="True">
+                                            <Border
+                                                Canvas.Top="10"
+                                                Canvas.Right="-50"
+                                                Width="120"
+                                                Height="120"
+                                                CornerRadius="100"
+                                                Opacity="0.2">
+                                                <Border.Style>
+                                                    <Style TargetType="Border">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Status}" Value="0">
+                                                                <Setter Property="Background" Value="Aqua" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Status}" Value="1">
+                                                                <Setter Property="Background" Value="Gold" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Border.Style>
+                                            </Border>
+                                            <Border
+                                                Canvas.Top="80"
+                                                Canvas.Right="-30"
+                                                Width="120"
+                                                Height="120"
+                                                CornerRadius="100"
+                                                Opacity="0.2">
+                                                <Border.Style>
+                                                    <Style TargetType="Border">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Status}" Value="0">
+                                                                <Setter Property="Background" Value="Aqua" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Status}" Value="1">
+                                                                <Setter Property="Background" Value="SaddleBrown" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Border.Style>
+                                            </Border>
+                                        </Canvas>
+                                    </Grid>
+                                </materdesign:TransitioningContent>
+
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Grid>
+        </materdesign:DrawerHost>
+    </materdesign:DialogHost>
+</UserControl>

@@ -1,0 +1,229 @@
+﻿<UserControl
+    x:Class="MyToDo.Views.IndexView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:behavior="http://schemas.microsoft.com/xaml/behaviors"
+    xmlns:cvt="clr-namespace:MyToDo.Common.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:MyToDo.Views"
+    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <UserControl.Resources>
+        <cvt:IntToBoolConverter x:Key="IntToBool" />
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <TextBlock
+            Margin="20,10"
+            FontSize="20"
+            Text="{Binding CurrentDate}" />
+        <ItemsControl Grid.Row="1" ItemsSource="{Binding TaskBars}">
+            <!--  定义承载item的容器并指定容器使用UniformGrid的方式，内部自动按照4列排放  -->
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <UniformGrid Columns="4" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <!--  定义每一个item内部的内容模板  -->
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Border
+                        Margin="10,5"
+                        Background="{Binding Color}"
+                        CornerRadius="10">
+                        <Border.InputBindings>
+                            <MouseBinding
+                                Command="{Binding DataContext.NavigateCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ItemsControl}}"
+                                CommandParameter="{Binding}"
+                                MouseAction="LeftClick" />
+                        </Border.InputBindings>
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <!--  设置当鼠标滑过时的阴影  -->
+                                        <Setter Property="Effect">
+                                            <Setter.Value>
+                                                <!--  ShadowDepth超出阴影超出本体的距离  -->
+                                                <DropShadowEffect
+                                                    BlurRadius="10"
+                                                    ShadowDepth="2"
+                                                    Color="#DDDDDD" />
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                        <Grid>
+                            <StackPanel Margin="10">
+                                <materialDesign:PackIcon
+                                    Width="30"
+                                    Height="30"
+                                    Margin="10,0"
+                                    HorizontalAlignment="Left"
+                                    Kind="{Binding Icon}" />
+                                <TextBlock
+                                    Margin="10,10"
+                                    HorizontalAlignment="Left"
+                                    FontSize="15"
+                                    Text="{Binding Title}" />
+                                <TextBlock
+                                    Margin="10,0"
+                                    HorizontalAlignment="Left"
+                                    FontSize="40"
+                                    FontWeight="Bold"
+                                    Text="{Binding Content}" />
+                            </StackPanel>
+                            <!--  支持折叠布局的容器  -->
+                            <!--  ClipToBounds="True"裁剪超出border的内容  -->
+                            <Canvas ClipToBounds="True">
+                                <Border
+                                    Canvas.Top="10"
+                                    Canvas.Right="-50"
+                                    Width="120"
+                                    Height="120"
+                                    Background="Aqua"
+                                    CornerRadius="100"
+                                    Opacity="0.2" />
+                                <Border
+                                    Canvas.Top="80"
+                                    Canvas.Right="-30"
+                                    Width="120"
+                                    Height="120"
+                                    Background="Aqua"
+                                    CornerRadius="100"
+                                    Opacity="0.2" />
+                            </Canvas>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <Grid Grid.Row="2" Margin="0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="0.5*" />
+                <ColumnDefinition Width="0.5*" />
+            </Grid.ColumnDefinitions>
+            <Border
+                Grid.Column="0"
+                Margin="10,5"
+                Background="DarkGray"
+                CornerRadius="5"
+                Opacity="0.1" />
+            <DockPanel Margin="10">
+                <DockPanel DockPanel.Dock="Top" LastChildFill="False">
+                    <TextBlock
+                        Margin="5"
+                        FontSize="20"
+                        FontWeight="Bold"
+                        Text="待办事项" />
+                    <Button
+                        Width="30"
+                        Height="30"
+                        Margin="5"
+                        VerticalAlignment="Top"
+                        Command="{Binding ExecuteCommand}"
+                        CommandParameter="新增待办事项"
+                        DockPanel.Dock="Right"
+                        Style="{StaticResource MaterialDesignFloatingActionAccentButton}">
+                        <materialDesign:PackIcon Kind="Add" />
+                    </Button>
+                </DockPanel>
+                <!--  ScrollViewer.VerticalScrollBarVisibility="Hidden"隐藏滚动条  -->
+                <!--  HorizontalContentAlignment="Stretch"将item的横向内容布局设置为拉伸  -->
+                <ListBox
+                    x:Name="toDoList"
+                    Margin="5"
+                    HorizontalContentAlignment="Stretch"
+                    ItemsSource="{Binding Summary.ToDoList}"
+                    ScrollViewer.VerticalScrollBarVisibility="Hidden">
+                    <behavior:Interaction.Triggers>
+                        <behavior:EventTrigger EventName="MouseDoubleClick">
+                            <behavior:InvokeCommandAction Command="{Binding EditToDoCommand}" CommandParameter="{Binding ElementName=toDoList, Path=SelectedItem}" />
+                        </behavior:EventTrigger>
+                    </behavior:Interaction.Triggers>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <DockPanel LastChildFill="False">
+                                <ToggleButton
+                                    Command="{Binding DataContext.ToDoCompltedCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ItemsControl}}"
+                                    CommandParameter="{Binding}"
+                                    DockPanel.Dock="Right"
+                                    IsChecked="{Binding Status, Converter={StaticResource IntToBool}}" />
+                                <StackPanel MaxHeight="80">
+                                    <TextBlock
+                                        FontSize="16"
+                                        FontWeight="Bold"
+                                        Text="{Binding Title}" />
+                                    <TextBlock
+                                        Margin="0,5"
+                                        Opacity="0.5"
+                                        Text="{Binding Content}" />
+                                </StackPanel>
+                            </DockPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </DockPanel>
+            <Border
+                Grid.Column="1"
+                Margin="10,5"
+                Background="DarkGray"
+                CornerRadius="5"
+                Opacity="0.1" />
+            <DockPanel Grid.Column="1" Margin="10">
+                <DockPanel DockPanel.Dock="Top" LastChildFill="False">
+                    <TextBlock
+                        Margin="5"
+                        FontSize="20"
+                        FontWeight="Bold"
+                        Text="待办事项" />
+                    <Button
+                        Width="30"
+                        Height="30"
+                        Margin="5"
+                        VerticalAlignment="Top"
+                        Command="{Binding ExecuteCommand}"
+                        CommandParameter="新增备忘录"
+                        DockPanel.Dock="Right"
+                        Style="{StaticResource MaterialDesignFloatingActionAccentButton}">
+                        <materialDesign:PackIcon Kind="Add" />
+                    </Button>
+                </DockPanel>
+                <ListBox
+                    x:Name="memoList"
+                    Margin="5"
+                    ItemsSource="{Binding Summary.MemoList}"
+                    ScrollViewer.VerticalScrollBarVisibility="Hidden">
+                    <behavior:Interaction.Triggers>
+                        <behavior:EventTrigger EventName="MouseDoubleClick">
+                            <behavior:InvokeCommandAction Command="{Binding EditMemoCommand}" CommandParameter="{Binding ElementName=memoList, Path=SelectedItem}" />
+                        </behavior:EventTrigger>
+                    </behavior:Interaction.Triggers>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel MaxHeight="80">
+                                <TextBlock
+                                    FontSize="16"
+                                    FontWeight="Bold"
+                                    Text="{Binding Title}" />
+                                <TextBlock
+                                    Margin="0,5"
+                                    Opacity="0.5"
+                                    Text="{Binding Content}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </DockPanel>
+        </Grid>
+    </Grid>
+</UserControl>

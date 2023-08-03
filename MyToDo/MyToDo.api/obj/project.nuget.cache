@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "dgSpecHash": "IDUjFEiGv7EVeFzbYwk2lxx7WYTV25eWR+Yaf6Au3sN3XhxLD71aHYPTcMhrjB2B+P3hXpT82glIjCIj9Biycw==",
+  "success": true,
+  "projectFilePath": "D:\\C#资料\\WPF\\MyToDo\\MyToDo.api\\MyToDo.api.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\DJ\\.nuget\\packages\\microsoft.extensions.apidescription.server\\3.0.0\\microsoft.extensions.apidescription.server.3.0.0.nupkg.sha512",
+    "C:\\Users\\DJ\\.nuget\\packages\\microsoft.openapi\\1.2.3\\microsoft.openapi.1.2.3.nupkg.sha512",
+    "C:\\Users\\DJ\\.nuget\\packages\\swashbuckle.aspnetcore\\6.2.3\\swashbuckle.aspnetcore.6.2.3.nupkg.sha512",
+    "C:\\Users\\DJ\\.nuget\\packages\\swashbuckle.aspnetcore.swagger\\6.2.3\\swashbuckle.aspnetcore.swagger.6.2.3.nupkg.sha512",
+    "C:\\Users\\DJ\\.nuget\\packages\\swashbuckle.aspnetcore.swaggergen\\6.2.3\\swashbuckle.aspnetcore.swaggergen.6.2.3.nupkg.sha512",
+    "C:\\Users\\DJ\\.nuget\\packages\\swashbuckle.aspnetcore.swaggerui\\6.2.3\\swashbuckle.aspnetcore.swaggerui.6.2.3.nupkg.sha512"
+  ],
+  "logs": []
+}
